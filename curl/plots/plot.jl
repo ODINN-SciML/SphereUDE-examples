@@ -7,7 +7,7 @@ using Plots.PlotMeasures
 using JLD2
 using LinearAlgebra
 
-JLD2.@load "examples/curl/results/results_dict.jld2" 
+JLD2.@load "curl/results/results_dict.jld2" 
 
 data_directions_sph = cart2sph(results_dict["directions"], radians=false)
 fit_directions_sph = cart2sph(results_dict["fit_directions"], radians=false)
@@ -54,7 +54,7 @@ plot!(fontfamily="Computer Modern",
     size=(1200,500),
     dpi=600)
 
-Plots.savefig(plot_latitude, "examples/curl/plots/latitude.pdf")
+Plots.savefig(plot_latitude, "curl/plots/latitude.pdf")
 
 ### Longitude Plot 
 
@@ -75,7 +75,7 @@ plot!(fontfamily="Computer Modern",
     size=(1200,500),
     dpi=600)
 
-Plots.savefig(plot_longitude, "examples/curl/plots/longitude.pdf")
+Plots.savefig(plot_longitude, "curl/plots/longitude.pdf")
 
 
 ### Angular velocity Plot
@@ -101,7 +101,7 @@ plot!(fontfamily="Computer Modern",
     dpi=300)
 
 
-Plots.savefig(plot_angular, "examples/curl/plots/angular.pdf")
+Plots.savefig(plot_angular, "curl/plots/angular.pdf")
 
 ### Lat and long of inversion
 
@@ -132,7 +132,7 @@ plot!(fontfamily="Computer Modern",
     margin= 10mm,
     size=(1200,500),
     dpi=300)
-    Plots.savefig(plot_angular, "examples/curl/plots/lat_rotation.pdf")
+    Plots.savefig(plot_angular, "curl/plots/lat_rotation.pdf")
 
 ### Lat and long combined
 
@@ -148,7 +148,7 @@ plot!(fontfamily="Computer Modern",
     margin= 7mm,
     size=(1400,1600),
     dpi=600)
-Plots.savefig(combo_plot, "examples/curl/plots/combo.pdf")
+Plots.savefig(combo_plot, "curl/plots/combo.pdf")
 
 ### Loss function
 
@@ -180,4 +180,4 @@ plot!(fontfamily="Computer Modern",
     size=(700,500),
     dpi=300)
 
-Plots.savefig(plot_loss, "examples/curl/plots/loss.pdf")
+Plots.savefig(plot_loss, "curl/plots/loss.pdf")

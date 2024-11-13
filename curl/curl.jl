@@ -14,7 +14,7 @@ using SphereUDE
 # Random seed
 using Random
 rng = Random.default_rng()
-Random.seed!(rng, 333)
+Random.seed!(rng, 666)
 
 # Total time simulation
 tspan = [0, 100.0]
@@ -63,7 +63,7 @@ data = SphereData(times=times_samples, directions=X_true, kappas=nothing, L=L_tr
 params = SphereParameters(tmin = tspan[1], tmax = tspan[2], 
                           reg = nothing,
                           u0 = [0.0, 0.0, -1.0],
-                          train_initial_condition = false, # change to true for real example
+                          train_initial_condition = true,
                           ωmax = ω₀, reltol = reltol, abstol = abstol,
                           niter_ADAM = 2000, niter_LBFGS = 8000, 
                           pretrain = false, 
@@ -81,11 +81,11 @@ U = Lux.Chain(
 results = train(data, params, rng, nothing, U)
 results_dict = convert2dict(data, results)
 
-JLD2.@save "examples/curl/results/results_dict.jld2" results_dict
+JLD2.@save "curl/results/results_dict.jld2" results_dict
 
 ##############################################################
 ######################  PyCall Plots #########################
 ##############################################################
 
-plot_sphere(data, results, 0.0, 0.0, saveas="examples/plots/curl/sphere.pdf", title="Curl") # , matplotlib_rcParams=Dict("font.size"=> 50))
+plot_sphere(data, results, 0.0, 0.0, saveas="/curl/plots/sphere.pdf", title="Curl") # , matplotlib_rcParams=Dict("font.size"=> 50))
 plot_L(data, results, saveas="examples/plots/curl/L.pdf", title="Curl")
