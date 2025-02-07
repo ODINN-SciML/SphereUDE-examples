@@ -1,10 +1,7 @@
-using Pkg; Pkg.activate(".")
-using Revise 
-
 using LinearAlgebra, Statistics, Distributions 
 using SciMLSensitivity
 using OrdinaryDiffEqCore, OrdinaryDiffEqTsit5
-using Optimization, OptimizationOptimisers, OptimizationOptimJL
+# using Optimization, OptimizationOptimisers, OptimizationOptimJL
 using Lux 
 using JLD2
 
@@ -72,6 +69,7 @@ params = SphereParameters(tmin = tspan[1], tmax = tspan[2],
                           reg = regs, 
                           train_initial_condition = false,
                           multiple_shooting = false, 
+                          n_quadrature = 400,
                           u0 = [0.0, 0.0, -1.0], ωmax = ω₀, reltol = reltol, abstol = abstol,
                           niter_ADAM = 3000, niter_LBFGS = 2000, 
                           sensealg = InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true))) 
@@ -94,8 +92,8 @@ results = train(data, params, rng, nothing, U)
 ######################  PyCall Plots #########################
 ##############################################################
 
-plot_sphere(data, results, -20., 125., saveas="examples/double_rotation/" * title * "_sphere.pdf", title="Double rotation") # , matplotlib_rcParams=Dict("font.size"=> 50))
-plot_L(data, results, saveas="examples/double_rotation/" * title * "_L.pdf", title="Double rotation")
+plot_sphere(data, results, -20., 125., saveas="double-rotation/" * title * "sphere.pdf", title="Double rotation") # , matplotlib_rcParams=Dict("font.size"=> 50))
+plot_L(data, results, saveas="double-rotation/" * title * "L.pdf", title="Double rotation")
 
 return data, results
 
@@ -104,82 +102,23 @@ end # run
 # Run different experiments
 
 
-### Finite differeces
-
-# run(; kappa = 50., 
-#       regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=FiniteDifferences(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=10.0)], 
-#       title = "plots/FD_plot_50")
-
-# run(; kappa = 200., 
-#       regs = [Regularization(order=1, power=1.0, λ=1.0, diff_mode=FiniteDifferences(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/FD_plot_200")
-
-
-# run(; kappa = 1000., 
-#       regs = [Regularization(order=1, power=1.0, λ=1.0, diff_mode=FiniteDifferences(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/FD_plot_1000")
-
-
-# Complex Step Method
-
-# run(; kappa = 50., 
-#       regs = [Regularization(order=1, power=1.0, λ=0.01, diff_mode=ComplexStepDifferentiation(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/CS_plot_50")
-
-# run(; kappa = 200., 
-#       regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=ComplexStepDifferentiation(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/CS_plot_200")
-
-
-# run(; kappa = 1000., 
-#       regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=ComplexStepDifferentiation(1e-5)),  
-#               Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/CS_plot_1000")
-
-
-
-### AD
-
 data_50, results_50 = run(; kappa = 50., 
-                regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=LuxNestedAD())], 
-                        #   Regularization(order=0, power=2.0, λ=0.1)], 
-                title = "plots/AD_plot_50")
+                regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=LuxNestedAD()), 
+                        Regularization(order=0, power=2.0, λ=0.5)], 
+                title = "plots/_AD_plot_50")
 results_dict_50 = convert2dict(data_50, results_50)
-JLD2.@save "examples/double_rotation/results/results_dict_50.jld2" results_dict_50
+JLD2.@save "double-rotation/results/_results_dict_50.jld2" results_dict_50
 
 data_200, results_200 = run(; kappa = 200., 
-                        regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=LuxNestedAD())],  
-                              #   Regularization(order=0, power=2.0, λ=0.1)], 
-                        title = "plots/AD_plot_200")
+                        regs = [Regularization(order=1, power=10.0, λ=1.0, diff_mode=LuxNestedAD()),  
+                                Regularization(order=0, power=2.0, λ=0.1)], 
+                        title = "plots/_AD_plot_200")
 results_dict_200 = convert2dict(data_200, results_200)
-JLD2.@save "examples/double_rotation/results/results_dict_200.jld2" results_dict_200
+JLD2.@save "double-rotation/results/_results_dict_200.jld2" results_dict_200
 
 data_1000, results_1000 = run(; kappa = 1000., 
-      regs = [Regularization(order=1, power=1.0, λ=0.1, diff_mode=LuxNestedAD())],
-            #   Regularization(order=0, power=2.0, λ=0.1)], 
-      title = "plots/AD_plot_1000")
+      regs = [Regularization(order=1, power=1.0, λ=0.2, diff_mode=LuxNestedAD()),
+              Regularization(order=0, power=2.0, λ=0.1)], 
+      title = "plots/_AD_plot_1000")
 results_dict_1000 = convert2dict(data_1000, results_1000)
-JLD2.@save "examples/double_rotation/results/results_dict_1000.jld2" results_dict_1000
-
-### no first-order regularization
-
-# run(; kappa = 50., 
-#       regs = [Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/None_plot_50")
-
-
-# run(; kappa = 200., 
-#       regs = [Regularization(order=0, power=2.0, λ=0.1)], 
-#       title = "plots/None_plot_200")
-
-# run(; kappa = 1000., 
-#       regs = nothing, 
-#       title = "plots/_None_plot_1000")
-
-a = 1
-b = 2
+JLD2.@save "double-rotation/results/_results_dict_1000.jld2" results_dict_1000

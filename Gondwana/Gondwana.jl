@@ -50,7 +50,8 @@ data = SphereData(times=times, directions=X, kappas=kappas, L=nothing)
 tspan = [times[begin], times[end]]
 
 params = SphereParameters(tmin = tspan[1], tmax = tspan[2], 
-                          reg = [Regularization(order=1, power=2.0, λ=1e5, diff_mode=FiniteDifferences(1e-4))], 
+                        #   reg = [Regularization(order=1, power=2.0, λ=1e5, diff_mode=FiniteDifferences(1e-4))], 
+                          reg = [Regularization(order=1, power=2.0, λ=1e5, diff_mode=LuxNestedAD())], 
                           # reg = nothing, 
                           pretrain = false, 
                           u0 = [0.0, 0.0, -1.0], ωmax = ω₀, 
