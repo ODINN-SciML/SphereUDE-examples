@@ -1,8 +1,12 @@
-using LinearAlgebra, Statistics, Distributions 
+using Pkg
+Pkg.activate(dirname(Base.current_project()))
+using Revise
+
+using LinearAlgebra, Statistics, Distributions
 using SciMLSensitivity
 using OrdinaryDiffEqCore, OrdinaryDiffEqTsit5
 # using Optimization, OptimizationOptimisers, OptimizationOptimJL
-using Lux 
+using Lux
 using JLD2
 
 using SphereUDE
@@ -24,12 +28,12 @@ N_samples = 300
 times_samples = collect(LinRange(tspan[1], tspan[2], N_samples))
 
 # Expected maximum angular deviation in one unit of time (degrees)
-Δω₀ = 10.0  
-# Angular velocity 
+Δω₀ = 10.0
+# Angular velocity
 ω₀ = Δω₀ * π / 180.0
 # Angular momentum
 
-# Solver tolerances 
+# Solver tolerances
 reltol = 1e-6
 abstol = 1e-6
 
@@ -60,22 +64,36 @@ X_true = X_noiseless
 
 data = SphereData(times=times_samples, directions=X_true, kappas=nothing, L=L_true)
 
-params = SphereParameters(tmin = tspan[1], tmax = tspan[2], 
-                          reg = nothing,
-                          u0 = [0.0, 0.0, -1.0],
-                          train_initial_condition = true,
-                          ωmax = ω₀, reltol = reltol, abstol = abstol,
-                          niter_ADAM = 2000, niter_LBFGS = 8000, 
-                          pretrain = false, 
-                          sensealg = InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true))) 
+params = SphereParameters(
+    tmin = tspan[1],
+    tmax = tspan[2],
+    reg = nothing,
+    u0 = [0.0, 0.0, -1.0],
+    train_initial_condition = true,
+    ωmax = 1.5 * ω₀,
+    reltol = reltol,
+    abstol = abstol,
+    niter_ADAM = 400,
+    ADAM_learning_rate = 0.004,
+    niter_LBFGS = 800,
+    pretrain = false,
+    sensealg = InterpolatingAdjoint(autojacvec = ReverseDiffVJP(true)),
+    # sensealg = BacksolveAdjoint(autojacvec = ReverseDiffVJP(true)),
+    verbose_step = 10
+    )
 
 init_bias(rng, in_dims) = LinRange(tspan[1], tspan[2], in_dims)
 init_weight(rng, out_dims, in_dims) = 0.1 * ones(out_dims, in_dims)
 
 U = Lux.Chain(
-    Lux.Dense(1, 200, rbf, init_bias=init_bias, init_weight=init_weight, use_bias=true),
-    Lux.Dense(200,10, gelu),
-    Lux.Dense(10, 3, Base.Fix2(sigmoid_cap, params.ωmax), use_bias=false)
+    Lux.WrappedFunction(x -> scale_input(x; xmin = params.tmin, xmax = params.tmax)),
+    # Lux.Dense(1, 200, rbf, init_bias=init_bias, init_weight=init_weight, use_bias=true),
+    # Lux.Dense(200,10, gelu),
+    Lux.Dense(1, 10, tanh),
+    Lux.Dense(10, 20, tanh),
+    Lux.Dense(20, 3, tanh),
+    # Lux.Dense(10, 3, Base.Fix2(sigmoid_cap, params.ωmax), use_bias=false)
+    Lux.WrappedFunction(x -> scale_norm(params.ωmax * x; scale = params.ωmax))
 )
 
 results = train(data, params, rng, nothing, U)
@@ -87,5 +105,5 @@ JLD2.@save "curl/results/results_dict.jld2" results_dict
 ######################  PyCall Plots #########################
 ##############################################################
 
-plot_sphere(data, results, 0.0, 0.0, saveas="/curl/plots/sphere.pdf", title="Curl") # , matplotlib_rcParams=Dict("font.size"=> 50))
-plot_L(data, results, saveas="examples/plots/curl/L.pdf", title="Curl")
+plot_sphere(data, results, 0.0, 0.0, saveas="./curl/plots/sphere.pdf", title="Curl") # , matplotlib_rcParams=Dict("font.size"=> 50))
+plot_L(data, results, saveas="./curl/plots/L.pdf", title="Curl")

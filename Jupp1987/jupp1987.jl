@@ -21,8 +21,8 @@ data = SphereData(times=times, directions=X, kappas=nothing, L=nothing)
 # Angular velocity 
 ω₀ = Δω₀ * π / 180.0
 
-regs = [Regularization(order=1, power=1.0, λ=0.001, diff_mode=FiniteDifferences(1e-4)), 
-        Regularization(order=0, power=2.0, λ=0.1, diff_mode=FiniteDifferences(1e-4))]
+regs = [Regularization(order=1, power=1.0, λ=0.001, diff_mode=FiniteDiff(1e-4)), 
+        Regularization(order=0, power=2.0, λ=0.1, diff_mode=FiniteDiff(1e-4))]
 # regs = [Regularization(order=1, power=2.0, λ=0.1, diff_mode="Finite Differences")]
 # regs = nothing
 

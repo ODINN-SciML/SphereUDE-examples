@@ -159,14 +159,14 @@ plot_loss = Plots.plot(1:length(losses), losses, label="Loss Function",
                     ylabel="Loss", lw = 5, c=loss_color,
                     yaxis=:log,
                     # yticks=[1,10,100],
-                    xlimits=(0,10000),
+                    xlimits=(0,1200),
                     ylimits=(1e-9, 1e1),
-                    xticks=[0,2000,4000,6000,8000, 10000],
+                    xticks=[0, 200, 400, 600, 800, 1000, 1200],
                     yticks=[1e-1, 1e-3, 1e-5, 1e-7],
                     legend=:topright)
 
-vspan!(plot_loss, [0,2000], color = :navajowhite3, alpha = 0.2, labels = "ADAM");
-vspan!(plot_loss, [2000,10000], color = :navajowhite4, alpha = 0.2, labels = "BFGS");
+vspan!(plot_loss, [0,400], color = :navajowhite3, alpha = 0.2, labels = "ADAM");
+vspan!(plot_loss, [400,1200], color = :navajowhite4, alpha = 0.2, labels = "LBFGS");
 
 plot!(fontfamily="Computer Modern",
     #title="PIL51",
