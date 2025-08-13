@@ -1,0 +1,9 @@
+cff-version: 1.1.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Sapienza"
+  given-names: "Facundo"
+  orcid: "https://orcid.org/0000-0003-4252-7161"
+title:ODINN-SciML/SphereUDE-examples: Examples for Publication
+version: v0.0.1
+date-released: 2025-08-13
